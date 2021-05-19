@@ -1,8 +1,8 @@
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-  typeof define === 'function' && define.amd ? define(factory) :
-  (global = global || self, global.vuexI18n = factory());
-}(this, function () { 'use strict';
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+  typeof define === 'function' && define.amd ? define(['exports'], factory) :
+  (global = global || self, factory(global.vuexI18n = {}));
+}(this, function (exports) { 'use strict';
 
   function _typeof(obj) {
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
@@ -865,10 +865,12 @@
 
   var index = {
     store: i18nVuexModule,
-    plugin: VuexI18nPlugin,
-    createI18n: createI18n
+    plugin: VuexI18nPlugin
   };
 
-  return index;
+  exports.default = index;
+  exports.createI18n = createI18n;
+
+  Object.defineProperty(exports, '__esModule', { value: true });
 
 }));

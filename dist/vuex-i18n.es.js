@@ -859,8 +859,8 @@ function () {
 
 var index = {
   store: i18nVuexModule,
-  plugin: VuexI18nPlugin,
-  createI18n: createI18n
+  plugin: VuexI18nPlugin
 };
 
 export default index;
+export { createI18n };

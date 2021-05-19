@@ -1,5 +1,7 @@
 'use strict';
 
+Object.defineProperty(exports, '__esModule', { value: true });
+
 function _typeof(obj) {
   if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
     _typeof = function (obj) {
@@ -861,8 +863,8 @@ function () {
 
 var index = {
   store: i18nVuexModule,
-  plugin: VuexI18nPlugin,
-  createI18n: createI18n
+  plugin: VuexI18nPlugin
 };
 
-module.exports = index;
+exports.default = index;
+exports.createI18n = createI18n;
