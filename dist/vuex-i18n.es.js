@@ -826,22 +826,21 @@ function () {
         exists: phaseOutExistsFn
       }; // register global methods
       // todo: fix it
-      // Vue.i18n = {
-      // 	locale: getLocale,
-      // 	locales: getLocales,
-      // 	set: setLocale,
-      // 	add: addLocale,
-      // 	replace: replaceLocale,
-      // 	remove: removeLocale,
-      // 	fallback: setFallbackLocale,
-      // 	translate: translate,
-      // 	translateIn: translateInLanguage,
-      // 	localeExists: checkLocaleExists,
-      // 	keyExists: checkKeyExists,
-      //
-      // 	exists: phaseOutExistsFn
-      // };
-      // register the translation function on the vue instance directly
+
+      app.i18n = {
+        locale: getLocale,
+        locales: getLocales,
+        set: setLocale,
+        add: addLocale,
+        replace: replaceLocale,
+        remove: removeLocale,
+        fallback: setFallbackLocale,
+        translate: translate,
+        translateIn: translateInLanguage,
+        localeExists: checkLocaleExists,
+        keyExists: checkKeyExists,
+        exists: phaseOutExistsFn
+      }; // register the translation function on the vue instance directly
 
       app.config.globalProperties.$t = translate; // register the specific language translation function on the vue instance directly
 
