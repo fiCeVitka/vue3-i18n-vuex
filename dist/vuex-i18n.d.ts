@@ -113,6 +113,6 @@ export declare class VuexI18nPlugin<S> {
   constructor(options: I18NOptions<S>);
 }
 
-export function createStore<S>(options: I18NOptions<S>): VuexI18nPlugin<S>;
+export function createI18n<S>(options: I18NOptions<S>): VuexI18nPlugin<S>;
 
 export default _default;
