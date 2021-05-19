@@ -20,6 +20,16 @@ export interface i18nState {
   };
 }
 
+export interface I18NOptions<S> {
+  warnings?: boolean;
+  moduleName?: string;
+  identifiers?: any;
+  preserveState?: boolean;
+  translateFilterName?: string;
+  translateInFilterName?: string;
+  onTranslationNotFound?: void;
+}
+
 export interface Translations {
   [key: string]: string | Translations;
 }
@@ -98,5 +108,11 @@ declare const _default: {
   plugin: PluginObject<Ii18n>;
   store: Object; // the store can be of any form of object
 };
+
+export declare class VuexI18nPlugin<S> {
+  constructor(options: I18NOptions<S>);
+}
+
+export function createStore<S>(options: I18NOptions<S>): VuexI18nPlugin<S>;
 
 export default _default;
