@@ -1,7 +1,7 @@
 {
-  "name": "vuex-i18n",
-  "version": "1.13.1",
-  "description": "Easy localization for vue-components using vuex as data store",
+  "name": "vue3-i18n-vuex",
+  "version": "1.0.0",
+  "description": "Easy localization for vue-components using vuex as data store (vue 3)",
   "directories": {
     "test": "test",
     "doc": "docs",
@@ -12,7 +12,7 @@
   "files": ["dist"],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dkfbasel/vuex-i18n.git"
+    "url": "git+https://github.com/fiCeVitka/vue3-i18n-vuex.git"
   },
   "keywords": [
     "localization",

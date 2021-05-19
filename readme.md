@@ -1,4 +1,8 @@
-# vuex-i18n
+# vuex-i18n vue 3
+
+This is a fork based on [vuex-i18n](https://github.com/dkfbasel/vuex-i18n), but for vue 3.
+
+
 We are big fans of the awesome vue, vuex and vue-router libraries and were just
 looking for an easy to use internationalization plugin, employing as much of
 the "standard library" as possible.
