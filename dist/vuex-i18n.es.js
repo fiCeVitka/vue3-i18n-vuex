@@ -568,24 +568,24 @@ function () {
 
     this.onTranslationNotFound = onTranslationNotFound;
     this._store = Object.create(null);
-  }
+  } // get localized string from store. note that we pass the arguments passed
+  // to the function directly to the translateInLanguage function
+
 
   _createClass(VuexI18nPlugin, [{
     key: "translate",
-    // get localized string from store. note that we pass the arguments passed
-    // to the function directly to the translateInLanguage function
     value: function translate() {
       // get the current language from the store
       var locale = this._store.state[this._config.moduleName].locale;
       return this.translateInLanguage.apply(this, [locale].concat(Array.prototype.slice.call(arguments)));
-    }
-  }, {
-    key: "translateInLanguage",
-    // get localized string from store in a given language if available.
+    } // get localized string from store in a given language if available.
     // there are two possible signatures for the function.
     // we will check the arguments to make up the options passed.
     // 1: locale, key, options, pluralization
     // 2: locale, key, defaultValue, options, pluralization
+
+  }, {
+    key: "translateInLanguage",
     value: function translateInLanguage(locale) {
       var _this = this;
 
@@ -683,10 +683,10 @@ function () {
       }
 
       return render(locale, translations[fallback][key], options, pluralization);
-    }
+    } // check if the given key exists in the current locale
+
   }, {
     key: "checkKeyExists",
-    // check if the given key exists in the current locale
     value: function checkKeyExists(key) {
       var scope = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'fallback';
       // get the current language from the store
@@ -720,50 +720,50 @@ function () {
 
 
       return false;
-    }
+    } // add a filter function to translate in a given locale (i.e. {{ 'something' | translateIn('en') }})
+
   }, {
     key: "translateInLanguageFilter",
-    // add a filter function to translate in a given locale (i.e. {{ 'something' | translateIn('en') }})
     value: function translateInLanguageFilter(key, locale) {
       for (var _len = arguments.length, args = new Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
         args[_key - 2] = arguments[_key];
       }
 
       return this.translateInLanguage.apply(this, [locale, key].concat(args));
-    }
+    } // set fallback locale
+
   }, {
     key: "setFallbackLocale",
-    // set fallback locale
     value: function setFallbackLocale(locale) {
       this._store.dispatch({
         type: "".concat(this._config.moduleName, "/setFallbackLocale"),
         locale: locale
       });
-    }
+    } // set the current locale
+
   }, {
     key: "setLocale",
-    // set the current locale
     value: function setLocale(locale) {
       this._store.dispatch({
         type: "".concat(this._config.moduleName, "/setLocale"),
         locale: locale
       });
-    }
+    } // get the current locale
+
   }, {
     key: "getLocale",
-    // get the current locale
     value: function getLocale() {
       return this._store.state[this._config.moduleName].locale;
-    }
+    } // get all available locales
+
   }, {
     key: "getLocales",
-    // get all available locales
     value: function getLocales() {
       return Object.keys(store.state[this._config.moduleName].translations);
-    }
+    } // add predefined translations to the store (keeping existing information)
+
   }, {
     key: "addLocale",
-    // add predefined translations to the store (keeping existing information)
     value: function addLocale(locale, translations) {
       console.log(this._store, this._config.moduleName);
       console.log('addLocale', locale, translations);
@@ -772,20 +772,20 @@ function () {
         locale: locale,
         translations: translations
       });
-    }
+    } // replace all locale information in the store
+
   }, {
     key: "replaceLocale",
-    // replace all locale information in the store
     value: function replaceLocale(locale, translations) {
       return this._store.dispatch({
         type: "".concat(this._config.moduleName, "/replaceLocale"),
         locale: locale,
         translations: translations
       });
-    }
+    } // remove the givne locale from the store
+
   }, {
     key: "removeLocale",
-    // remove the givne locale from the store
     value: function removeLocale(locale) {
       if (this._store.state[this._config.moduleName].translations.hasOwnProperty(locale)) {
         this._store.dispatch({
@@ -793,17 +793,17 @@ function () {
           locale: locale
         });
       }
-    }
+    } // we are phasing out the exists function
+
   }, {
     key: "phaseOutExistsFn",
-    // we are phasing out the exists function
     value: function phaseOutExistsFn(locale) {
       if (this._config.warnings) console.warn('i18n: $i18n.exists is depreceated. Please use $i18n.localeExists instead. It provides exactly the same functionality.');
       return this.checkLocaleExists(locale);
-    }
+    } // check if the given locale is already loaded
+
   }, {
     key: "checkLocaleExists",
-    // check if the given locale is already loaded
     value: function checkLocaleExists(locale) {
       return this._store.state[this._config.moduleName].translations.hasOwnProperty(locale);
     }
@@ -814,8 +814,7 @@ function () {
       var moduleName = this._config.moduleName;
       var identifiers = this._config.identifiers;
       var translateFilterName = this._config.translateFilterName;
-      var translateInFilterName = this._config.translateInFilterName;
-      this._store = store; // register the i18n module in the vuex store
+      var translateInFilterName = this._config.translateInFilterName; // register the i18n module in the vuex store
       // preserveState can be used via configuration if server side rendering is used
 
       store.registerModule(moduleName, i18nVuexModule, {
@@ -874,7 +873,8 @@ function () {
 
       app.config.globalProperties.$t = this.translate; // register the specific language translation function on the vue instance directly
 
-      app.config.globalProperties.$tlang = this.translateInLanguage; // register a filter function for translations
+      app.config.globalProperties.$tlang = this.translateInLanguage;
+      this._store = store; // register a filter function for translations
       // todo: fix it
       // Vue.filter(translateFilterName, translate);
       // Vue.filter(translateInFilterName, translateInLanguageFilter);

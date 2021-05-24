@@ -170,7 +170,7 @@ export class VuexI18nPlugin {
 
 		this.onTranslationNotFound = onTranslationNotFound;
 		this._store = Object.create(null);
-	};
+	}
 
 	// get localized string from store. note that we pass the arguments passed
 	// to the function directly to the translateInLanguage function
@@ -179,7 +179,7 @@ export class VuexI18nPlugin {
 		let locale = this._store.state[this._config.moduleName].locale;
 
 		return this.translateInLanguage(locale, ...arguments);
-	};
+	}
 
 	// get localized string from store in a given language if available.
 	// there are two possible signatures for the function.
@@ -298,7 +298,7 @@ export class VuexI18nPlugin {
 		}
 
 		return render(locale, translations[fallback][key], options, pluralization);
-	};
+	}
 
 	// check if the given key exists in the current locale
 	checkKeyExists(key, scope = 'fallback') {
@@ -337,12 +337,12 @@ export class VuexI18nPlugin {
 
 		// key does not exist in the store
 		return false;
-	};
+	}
 
 	// add a filter function to translate in a given locale (i.e. {{ 'something' | translateIn('en') }})
 	translateInLanguageFilter(key, locale, ...args) {
 		return this.translateInLanguage(locale, key, ...args);
-	};
+	}
 
 	// set fallback locale
 	setFallbackLocale(locale) {
@@ -350,7 +350,7 @@ export class VuexI18nPlugin {
 			type: `${this._config.moduleName}/setFallbackLocale`,
 			locale: locale
 		});
-	};
+	}
 
 	// set the current locale
 	setLocale(locale) {
@@ -358,17 +358,17 @@ export class VuexI18nPlugin {
 			type: `${this._config.moduleName}/setLocale`,
 			locale: locale
 		});
-	};
+	}
 
 	// get the current locale
 	getLocale() {
 		return this._store.state[this._config.moduleName].locale;
-	};
+	}
 
 	// get all available locales
 	getLocales() {
 		return Object.keys(store.state[this._config.moduleName].translations);
-	};
+	}
 
 	// add predefined translations to the store (keeping existing information)
 	addLocale(locale, translations) {
@@ -381,7 +381,7 @@ export class VuexI18nPlugin {
 			locale: locale,
 			translations: translations
 		});
-	};
+	}
 
 	// replace all locale information in the store
 	replaceLocale(locale, translations) {
@@ -390,7 +390,7 @@ export class VuexI18nPlugin {
 			locale: locale,
 			translations: translations
 		});
-	};
+	}
 
 	// remove the givne locale from the store
 	removeLocale(locale) {
@@ -400,18 +400,18 @@ export class VuexI18nPlugin {
 				locale: locale
 			});
 		}
-	};
+	}
 
 	// we are phasing out the exists function
 	phaseOutExistsFn(locale) {
 		if (this._config.warnings) console.warn('i18n: $i18n.exists is depreceated. Please use $i18n.localeExists instead. It provides exactly the same functionality.');
 		return this.checkLocaleExists(locale);
-	};
+	}
 
 	// check if the given locale is already loaded
 	checkLocaleExists(locale) {
 		return this._store.state[this._config.moduleName].translations.hasOwnProperty(locale);
-	};
+	}
 
 	install(app, store) {
 		// define module name and identifiers as constants to prevent any changes
@@ -419,8 +419,6 @@ export class VuexI18nPlugin {
 		const identifiers = this._config.identifiers;
 		const translateFilterName = this._config.translateFilterName;
 		const translateInFilterName = this._config.translateInFilterName;
-
-		this._store = store;
 
 		// register the i18n module in the vuex store
 		// preserveState can be used via configuration if server side rendering is used
@@ -494,6 +492,8 @@ export class VuexI18nPlugin {
 
 		// register the specific language translation function on the vue instance directly
 		app.config.globalProperties.$tlang = this.translateInLanguage;
+
+		this._store = store;
 
 		// register a filter function for translations
 		// todo: fix it
