@@ -559,267 +559,28 @@ function () {
       translateInFilterName: 'translateIn',
       onTranslationNotFound: function onTranslationNotFound() {}
     }, config);
-    this._config = config; // initialize the onTranslationNotFound function and make sure it is actually
-    // a function
-
-    var onTranslationNotFound = config.onTranslationNotFound;
-
-    if (typeof onTranslationNotFound !== 'function') {
-      console.error('i18n: i18n config option onTranslationNotFound must be a function');
-
-      onTranslationNotFound = function onTranslationNotFound() {};
-    }
-
-    this.onTranslationNotFound = onTranslationNotFound;
-    this._store = Object.create(null);
-  } // get localized string from store. note that we pass the arguments passed
-  // to the function directly to the translateInLanguage function
-
+    this._config = config;
+  }
 
   _createClass(VuexI18nPlugin, [{
-    key: "translate",
-    value: function translate() {
-      // get the current language from the store
-      var locale = this._store.state[this._config.moduleName].locale;
-      return this.translateInLanguage.apply(this, [locale].concat(Array.prototype.slice.call(arguments)));
-    } // get localized string from store in a given language if available.
-    // there are two possible signatures for the function.
-    // we will check the arguments to make up the options passed.
-    // 1: locale, key, options, pluralization
-    // 2: locale, key, defaultValue, options, pluralization
-
-  }, {
-    key: "translateInLanguage",
-    value: function translateInLanguage(locale) {
-      var _this = this;
-
-      // initialize the replacement function
-      var render = renderFn(this._config.identifiers, this._config.warnings); // read the function arguments
-
-      var args = arguments; // initialize options
-
-      var key = '';
-      var defaultValue = '';
-      var options = {};
-      var pluralization = null;
-      var count = args.length; // check if a default value was specified and fill options accordingly
-
-      if (count >= 3 && typeof args[2] === 'string') {
-        key = args[1];
-        defaultValue = args[2];
-
-        if (count > 3) {
-          options = args[3];
-        }
-
-        if (count > 4) {
-          pluralization = args[4];
-        }
-      } else {
-        key = args[1]; // default value was not specified and is therefore the same as the key
-
-        defaultValue = key;
-
-        if (count > 2) {
-          options = args[2];
-        }
-
-        if (count > 3) {
-          pluralization = args[3];
-        }
-      } // return the default value if the locale is not set (could happen on initialization)
-
-
-      if (!locale) {
-        if (this._config.warnings) console.warn('i18n: i18n locale is not set when trying to access translations:', key);
-        return defaultValue;
-      } // get the translations from the store
-
-
-      var translations = this._store.state[this._config.moduleName].translations; // get the last resort fallback from the store
-
-      var fallback = this._store.state[this._config.moduleName].fallback; // split locale by - to support partial fallback for regional locales
-      // like de-CH, en-UK
-
-      var localeRegional = locale.split('-'); // flag for translation to exist or not
-
-      var translationExists = true; // check if the language exists in the store. return the key if not
-
-      if (translations.hasOwnProperty(locale) === false) {
-        translationExists = false; // check if the key exists in the store. return the key if not
-      } else if (translations[locale].hasOwnProperty(key) === false) {
-        translationExists = false;
-      } // return the value from the store
-
-
-      if (translationExists === true) {
-        return render(locale, translations[locale][key], options, pluralization);
-      } // check if a regional locale translation would be available for the key
-      // i.e. de for de-CH
-
-
-      if (localeRegional.length > 1 && translations.hasOwnProperty(localeRegional[0]) === true && translations[localeRegional[0]].hasOwnProperty(key) === true) {
-        return render(localeRegional[0], translations[localeRegional[0]][key], options, pluralization);
-      } // invoke a method if a translation is not found
-
-
-      var asyncTranslation = this.onTranslationNotFound(locale, key, defaultValue); // resolve async translations by updating the store
-
-      if (asyncTranslation) {
-        Promise.resolve(asyncTranslation).then(function (value) {
-          var additionalTranslations = {};
-          additionalTranslations[key] = value;
-
-          _this.addLocale(locale, additionalTranslations);
-        });
-      } // check if a vaild fallback exists in the store.
-      // return the default value if not
-
-
-      if (translations.hasOwnProperty(fallback) === false) {
-        return render(locale, defaultValue, options, pluralization);
-      } // check if the key exists in the fallback locale in the store.
-      // return the default value if not
-
-
-      if (translations[fallback].hasOwnProperty(key) === false) {
-        return render(fallback, defaultValue, options, pluralization);
-      }
-
-      return render(locale, translations[fallback][key], options, pluralization);
-    } // check if the given key exists in the current locale
-
-  }, {
-    key: "checkKeyExists",
-    value: function checkKeyExists(key) {
-      var scope = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'fallback';
-      // get the current language from the store
-      var locale = this._store.state[this._config.moduleName].locale;
-      var fallback = this._store.state[this._config.moduleName].fallback;
-      var translations = this._store.state[this._config.moduleName].translations; // check the current translation
-
-      if (translations.hasOwnProperty(locale) && translations[locale].hasOwnProperty(key)) {
-        return true;
-      }
-
-      if (scope == 'strict') {
-        return false;
-      } // check any localized translations
-
-
-      var localeRegional = locale.split('-');
-
-      if (localeRegional.length > 1 && translations.hasOwnProperty(localeRegional[0]) && translations[localeRegional[0]].hasOwnProperty(key)) {
-        return true;
-      }
-
-      if (scope == 'locale') {
-        return false;
-      } // check if a fallback locale exists
-
-
-      if (translations.hasOwnProperty(fallback) && translations[fallback].hasOwnProperty(key)) {
-        return true;
-      } // key does not exist in the store
-
-
-      return false;
-    } // add a filter function to translate in a given locale (i.e. {{ 'something' | translateIn('en') }})
-
-  }, {
-    key: "translateInLanguageFilter",
-    value: function translateInLanguageFilter(key, locale) {
-      for (var _len = arguments.length, args = new Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
-        args[_key - 2] = arguments[_key];
-      }
-
-      return this.translateInLanguage.apply(this, [locale, key].concat(args));
-    } // set fallback locale
-
-  }, {
-    key: "setFallbackLocale",
-    value: function setFallbackLocale(locale) {
-      this._store.dispatch({
-        type: "".concat(this._config.moduleName, "/setFallbackLocale"),
-        locale: locale
-      });
-    } // set the current locale
-
-  }, {
-    key: "setLocale",
-    value: function setLocale(locale) {
-      this._store.dispatch({
-        type: "".concat(this._config.moduleName, "/setLocale"),
-        locale: locale
-      });
-    } // get the current locale
-
-  }, {
-    key: "getLocale",
-    value: function getLocale() {
-      return this._store.state[this._config.moduleName].locale;
-    } // get all available locales
-
-  }, {
-    key: "getLocales",
-    value: function getLocales() {
-      return Object.keys(store.state[this._config.moduleName].translations);
-    } // add predefined translations to the store (keeping existing information)
-
-  }, {
-    key: "addLocale",
-    value: function addLocale(locale, translations) {
-      console.log(this._store, this._config.moduleName);
-      console.log('addLocale', locale, translations);
-      return this._store.dispatch({
-        type: "".concat(this._config.moduleName, "/addLocale"),
-        locale: locale,
-        translations: translations
-      });
-    } // replace all locale information in the store
-
-  }, {
-    key: "replaceLocale",
-    value: function replaceLocale(locale, translations) {
-      return this._store.dispatch({
-        type: "".concat(this._config.moduleName, "/replaceLocale"),
-        locale: locale,
-        translations: translations
-      });
-    } // remove the givne locale from the store
-
-  }, {
-    key: "removeLocale",
-    value: function removeLocale(locale) {
-      if (this._store.state[this._config.moduleName].translations.hasOwnProperty(locale)) {
-        this._store.dispatch({
-          type: "".concat(this._config.moduleName, "/removeLocale"),
-          locale: locale
-        });
-      }
-    } // we are phasing out the exists function
-
-  }, {
-    key: "phaseOutExistsFn",
-    value: function phaseOutExistsFn(locale) {
-      if (this._config.warnings) console.warn('i18n: $i18n.exists is depreceated. Please use $i18n.localeExists instead. It provides exactly the same functionality.');
-      return this.checkLocaleExists(locale);
-    } // check if the given locale is already loaded
-
-  }, {
-    key: "checkLocaleExists",
-    value: function checkLocaleExists(locale) {
-      return this._store.state[this._config.moduleName].translations.hasOwnProperty(locale);
-    }
-  }, {
     key: "install",
     value: function install(app, store) {
       // define module name and identifiers as constants to prevent any changes
       var moduleName = this._config.moduleName;
       var identifiers = this._config.identifiers;
       var translateFilterName = this._config.translateFilterName;
-      var translateInFilterName = this._config.translateInFilterName; // register the i18n module in the vuex store
+      var translateInFilterName = this._config.translateInFilterName; // initialize the onTranslationNotFound function and make sure it is actually
+      // a function
+
+      var onTranslationNotFound = this._config.onTranslationNotFound;
+
+      if (typeof onTranslationNotFound !== 'function') {
+        console.error('i18n: i18n config option onTranslationNotFound must be a function');
+
+        onTranslationNotFound = function onTranslationNotFound() {};
+      } // register the i18n module in the vuex store
       // preserveState can be used via configuration if server side rendering is used
+
 
       store.registerModule(moduleName, i18nVuexModule, {
         preserveState: this._config.preserveState
@@ -841,44 +602,265 @@ function () {
         };
 
         return;
-      } // register vue prototype methods
+      } // initialize the replacement function
+
+
+      var render = renderFn(identifiers, this._config.warnings); // get localized string from store. note that we pass the arguments passed
+      // to the function directly to the translateInLanguage function
+
+      var translate = function $t() {
+        // get the current language from the store
+        var locale = store.state[moduleName].locale;
+        return translateInLanguage.apply(void 0, [locale].concat(Array.prototype.slice.call(arguments)));
+      }; // get localized string from store in a given language if available.
+      // there are two possible signatures for the function.
+      // we will check the arguments to make up the options passed.
+      // 1: locale, key, options, pluralization
+      // 2: locale, key, defaultValue, options, pluralization
+
+
+      var translateInLanguage = function translateInLanguage(locale) {
+        // read the function arguments
+        var args = arguments; // initialize options
+
+        var key = '';
+        var defaultValue = '';
+        var options = {};
+        var pluralization = null;
+        var count = args.length; // check if a default value was specified and fill options accordingly
+
+        if (count >= 3 && typeof args[2] === 'string') {
+          key = args[1];
+          defaultValue = args[2];
+
+          if (count > 3) {
+            options = args[3];
+          }
+
+          if (count > 4) {
+            pluralization = args[4];
+          }
+        } else {
+          key = args[1]; // default value was not specified and is therefore the same as the key
+
+          defaultValue = key;
+
+          if (count > 2) {
+            options = args[2];
+          }
+
+          if (count > 3) {
+            pluralization = args[3];
+          }
+        } // return the default value if the locale is not set (could happen on initialization)
+
+
+        if (!locale) {
+          if (this._config.warnings) console.warn('i18n: i18n locale is not set when trying to access translations:', key);
+          return defaultValue;
+        } // get the translations from the store
+
+
+        var translations = store.state[moduleName].translations; // get the last resort fallback from the store
+
+        var fallback = store.state[moduleName].fallback; // split locale by - to support partial fallback for regional locales
+        // like de-CH, en-UK
+
+        var localeRegional = locale.split('-'); // flag for translation to exist or not
+
+        var translationExists = true; // check if the language exists in the store. return the key if not
+
+        if (translations.hasOwnProperty(locale) === false) {
+          translationExists = false; // check if the key exists in the store. return the key if not
+        } else if (translations[locale].hasOwnProperty(key) === false) {
+          translationExists = false;
+        } // return the value from the store
+
+
+        if (translationExists === true) {
+          return render(locale, translations[locale][key], options, pluralization);
+        } // check if a regional locale translation would be available for the key
+        // i.e. de for de-CH
+
+
+        if (localeRegional.length > 1 && translations.hasOwnProperty(localeRegional[0]) === true && translations[localeRegional[0]].hasOwnProperty(key) === true) {
+          return render(localeRegional[0], translations[localeRegional[0]][key], options, pluralization);
+        } // invoke a method if a translation is not found
+
+
+        var asyncTranslation = onTranslationNotFound(locale, key, defaultValue); // resolve async translations by updating the store
+
+        if (asyncTranslation) {
+          Promise.resolve(asyncTranslation).then(function (value) {
+            var additionalTranslations = {};
+            additionalTranslations[key] = value;
+            addLocale(locale, additionalTranslations);
+          });
+        } // check if a vaild fallback exists in the store.
+        // return the default value if not
+
+
+        if (translations.hasOwnProperty(fallback) === false) {
+          return render(locale, defaultValue, options, pluralization);
+        } // check if the key exists in the fallback locale in the store.
+        // return the default value if not
+
+
+        if (translations[fallback].hasOwnProperty(key) === false) {
+          return render(fallback, defaultValue, options, pluralization);
+        }
+
+        return render(locale, translations[fallback][key], options, pluralization);
+      }; // add a filter function to translate in a given locale (i.e. {{ 'something' | translateIn('en') }})
+
+
+      var checkKeyExists = function checkKeyExists(key) {
+        var scope = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'fallback';
+        // get the current language from the store
+        var locale = store.state[moduleName].locale;
+        var fallback = store.state[moduleName].fallback;
+        var translations = store.state[moduleName].translations; // check the current translation
+
+        if (translations.hasOwnProperty(locale) && translations[locale].hasOwnProperty(key)) {
+          return true;
+        }
+
+        if (scope == 'strict') {
+          return false;
+        } // check any localized translations
+
+
+        var localeRegional = locale.split('-');
+
+        if (localeRegional.length > 1 && translations.hasOwnProperty(localeRegional[0]) && translations[localeRegional[0]].hasOwnProperty(key)) {
+          return true;
+        }
+
+        if (scope == 'locale') {
+          return false;
+        } // check if a fallback locale exists
+
+
+        if (translations.hasOwnProperty(fallback) && translations[fallback].hasOwnProperty(key)) {
+          return true;
+        } // key does not exist in the store
+
+
+        return false;
+      }; // set fallback locale
+
+
+      var setFallbackLocale = function setFallbackLocale(locale) {
+        store.dispatch({
+          type: "".concat(moduleName, "/setFallbackLocale"),
+          locale: locale
+        });
+      }; // set the current locale
+
+
+      var setLocale = function setLocale(locale) {
+        store.dispatch({
+          type: "".concat(moduleName, "/setLocale"),
+          locale: locale
+        });
+      }; // get the current locale
+
+
+      var getLocale = function getLocale() {
+        return store.state[moduleName].locale;
+      }; // get all available locales
+
+
+      var getLocales = function getLocales() {
+        return Object.keys(store.state[moduleName].translations);
+      }; // add predefined translations to the store (keeping existing information)
+
+
+      var addLocale = function addLocale(locale, translations) {
+        return store.dispatch({
+          type: "".concat(moduleName, "/addLocale"),
+          locale: locale,
+          translations: translations
+        });
+      }; // replace all locale information in the store
+
+
+      var replaceLocale = function replaceLocale(locale, translations) {
+        return store.dispatch({
+          type: "".concat(moduleName, "/replaceLocale"),
+          locale: locale,
+          translations: translations
+        });
+      }; // remove the givne locale from the store
+
+
+      var removeLocale = function removeLocale(locale) {
+        if (store.state[moduleName].translations.hasOwnProperty(locale)) {
+          store.dispatch({
+            type: "".concat(moduleName, "/removeLocale"),
+            locale: locale
+          });
+        }
+      }; // we are phasing out the exists function
+
+
+      var phaseOutExistsFn = function phaseOutExistsFn(locale) {
+        if (this._config.warnings) console.warn('i18n: $i18n.exists is depreceated. Please use $i18n.localeExists instead. It provides exactly the same functionality.');
+        return checkLocaleExists(locale);
+      }; // check if the given locale is already loaded
+
+
+      var checkLocaleExists = function checkLocaleExists(locale) {
+        return store.state[moduleName].translations.hasOwnProperty(locale);
+      }; // register vue prototype methods
 
 
       app.config.globalProperties.$i18n = {
-        locale: this.getLocale,
-        locales: this.getLocales,
-        set: this.setLocale,
-        add: this.addLocale,
-        replace: this.replaceLocale,
-        remove: this.removeLocale,
-        fallback: this.setFallbackLocale,
-        localeExists: this.checkLocaleExists,
-        keyExists: this.checkKeyExists,
-        translate: this.translate,
-        translateIn: this.translateInLanguage,
-        exists: this.phaseOutExistsFn
-      }; // register global methods
+        locale: getLocale,
+        locales: getLocales,
+        set: setLocale,
+        add: addLocale,
+        replace: replaceLocale,
+        remove: removeLocale,
+        fallback: setFallbackLocale,
+        localeExists: checkLocaleExists,
+        keyExists: checkKeyExists,
+        translate: translate,
+        translateIn: translateInLanguage,
+        exists: phaseOutExistsFn
+      };
+      this.locale = getLocale;
+      this.locales = getLocales;
+      this.set = setLocale;
+      this.add = addLocale;
+      this.replace = replaceLocale;
+      this.remove = removeLocale;
+      this.fallback = setFallbackLocale;
+      this.localeExists = checkLocaleExists;
+      this.keyExists = checkKeyExists;
+      this.translate = translate;
+      this.translateIn = translateInLanguage;
+      this.exists = phaseOutExistsFn; // register global methods
       // todo: fix it
 
       app.i18n = {
-        locale: this.getLocale,
-        locales: this.getLocales,
-        set: this.setLocale,
-        add: this.addLocale,
-        replace: this.replaceLocale,
-        remove: this.removeLocale,
-        fallback: this.setFallbackLocale,
-        translate: this.translate,
-        translateIn: this.translateInLanguage,
-        localeExists: this.checkLocaleExists,
-        keyExists: this.checkKeyExists,
-        exists: this.phaseOutExistsFn
+        locale: getLocale,
+        locales: getLocales,
+        set: setLocale,
+        add: addLocale,
+        replace: replaceLocale,
+        remove: removeLocale,
+        fallback: setFallbackLocale,
+        translate: translate,
+        translateIn: translateInLanguage,
+        localeExists: checkLocaleExists,
+        keyExists: checkKeyExists,
+        exists: phaseOutExistsFn
       }; // register the translation function on the vue instance directly
 
-      app.config.globalProperties.$t = this.translate; // register the specific language translation function on the vue instance directly
+      app.config.globalProperties.$t = translate; // register the specific language translation function on the vue instance directly
 
-      app.config.globalProperties.$tlang = this.translateInLanguage;
-      this._store = store; // register a filter function for translations
+      app.config.globalProperties.$tlang = translateInLanguage; // register a filter function for translations
       // todo: fix it
       // Vue.filter(translateFilterName, translate);
       // Vue.filter(translateInFilterName, translateInLanguageFilter);
