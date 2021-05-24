@@ -109,8 +109,32 @@ declare const _default: {
   store: Object; // the store can be of any form of object
 };
 
-export declare class VuexI18nPlugin<S> {
+export declare class VuexI18nPlugin<S> implements Ii18n{
   constructor(options: I18NOptions<S>);
+
+  add(locale: string, translations: Translations): void;
+
+  fallback(locale: string): void;
+
+  keyExists(key: string, scope?: string): boolean;
+
+  locale(): string | null;
+
+  localeExists(locale: string): boolean;
+
+  locales(): string[];
+
+  remove(locale: string): void;
+
+  replace(locale: string, translations: Translations): void;
+
+  set(locale: string): void;
+
+  translate(key: string, options?: any, pluralization?: number): string | undefined;
+  translate(key: string, defaultValue: string, options?: any, pluralization?: number): string | undefined;
+
+  translateIn(locale: string, key: string, options?: any, pluralization?: number): string | undefined;
+  translateIn(locale: string, key: string, defaultValue: string, options?: any, pluralization?: number): string | undefined;
 }
 
 export function createI18n<S>(options: I18NOptions<S>): VuexI18nPlugin<S>;

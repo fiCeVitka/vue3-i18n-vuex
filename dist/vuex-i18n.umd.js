@@ -573,6 +573,7 @@
       }
 
       this.onTranslationNotFound = onTranslationNotFound;
+      this._store = Object.create(null);
     }
 
     _createClass(VuexI18nPlugin, [{
@@ -770,6 +771,8 @@
       key: "addLocale",
       // add predefined translations to the store (keeping existing information)
       value: function addLocale(locale, translations) {
+        console.log(this._store, this._config.moduleName);
+        console.log('addLocale', locale, translations);
         return this._store.dispatch({
           type: "".concat(this._config.moduleName, "/addLocale"),
           locale: locale,

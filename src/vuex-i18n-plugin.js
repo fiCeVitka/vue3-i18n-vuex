@@ -169,6 +169,7 @@ export class VuexI18nPlugin {
 		}
 
 		this.onTranslationNotFound = onTranslationNotFound;
+		this._store = Object.create(null);
 	};
 
 	// get localized string from store. note that we pass the arguments passed
@@ -371,6 +372,10 @@ export class VuexI18nPlugin {
 
 	// add predefined translations to the store (keeping existing information)
 	addLocale(locale, translations) {
+		console.log(this._store, this._config.moduleName);
+
+		console.log('addLocale', locale, translations);
+
 		return this._store.dispatch({
 			type: `${this._config.moduleName}/addLocale`,
 			locale: locale,
